@@ -37,15 +37,15 @@ struct disk* get_new_disk(
 long get_time_taken_to_obey_request_in_millis(struct disk* d, struct request* req) {
     // TODO: Fix seek time
     // Everything is calculated in milliseconds
-    long seek_time = abs(req->cylinder - d->rw_head_track);
-    long rotational_delay = (req->sector - d->rw_head_sector + d->number_of_sectors_per_track) % d->number_of_sectors_per_track;
-    long transfer_time = (req->number_of_sectors_to_read - 1) * d->rotational_speed_in_RPM * 60 * 1000 / d->number_of_sectors_per_track;
+    long seek_time = 3 * d->avg_seek_time * abs(req->cylinder - d->rw_head_track) / d->number_of_cylinders;
+    long rotational_delay = ((req->sector - d->rw_head_sector + d->number_of_sectors_per_track) % d->number_of_sectors_per_track) * 60 * 1000 / d->number_of_sectors_per_track / (d->rotational_speed_in_RPM);
+    long transfer_time = (req->number_of_sectors_to_read) * 60 * 1000 / d->number_of_sectors_per_track / (d->rotational_speed_in_RPM);
     return seek_time + rotational_delay + transfer_time;
 }
 
 void move_to_position_of_request(struct disk* d, struct request* req) {
     d->rw_head_track = req->cylinder;
-    d->rw_head_sector = (req->sector + req->number_of_sectors_to_read) % d->number_of_sectors_per_track;
+    d->rw_head_sector = (req->sector + req->number_of_sectors_to_read - 1) % d->number_of_sectors_per_track;
 }
 
 struct request* get_new_request(

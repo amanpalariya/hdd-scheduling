@@ -1,5 +1,5 @@
---dependencies = logger.c ds.c helper.c
---libraries = -lpthread
+--dependencies = logger.c ds.c helper.c simulator.c
+--libraries = -lm
 --build-dir = build
 --main-file = main.c
 --output-filename = main.out

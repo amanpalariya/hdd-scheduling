@@ -3,6 +3,7 @@
 #include <sys/time.h>
 
 #include "../ds.h"
+#include "../helper.h"
 #include "../logger.h"
 
 int total_tests = 0;
@@ -26,9 +27,19 @@ void print_test_section(char* section) {
 
 void test_disk() {
     print_test_section("Testing disk");
-    struct disk* d = get_new_disk(7500, 512, 2, 4, 25, 20);
+    struct disk* d = get_new_disk(7500, 4, 512, 4, 25, 20);
 
-    log_test("New disk", d->rotational_speed_in_RPM == 7500 && d->avg_seek_time == 512 && d->sector_size_in_bytes == 2 && d->number_of_surfaces == 4 && d->number_of_cylinders == 25 && d->number_of_sectors_per_track == 20);
+    log_test("New disk", d->rotational_speed_in_RPM == 7500 && d->avg_seek_time == 4 && d->sector_size_in_bytes == 512 && d->number_of_surfaces == 4 && d->number_of_cylinders == 25 && d->number_of_sectors_per_track == 20);
+
+    long time;
+    time = get_time_taken_to_obey_request_in_millis(d, get_new_request(1, 15, 0, 0));
+    log_test("Seek time calculation", time == 7);
+
+    time = get_time_taken_to_obey_request_in_millis(d, get_new_request(1, 0, 15, 0));
+    log_test("Rotational delay calculation", time == 6);
+
+    time = get_time_taken_to_obey_request_in_millis(d, get_new_request(1, 0, 0, 15));
+    log_test("Transfer time calculation", time == 6);
 }
 
 void test_request() {
@@ -86,9 +97,21 @@ void test_ds() {
     test_queue();
 }
 
+void test_helper() {
+    print_test_section("Testing helper functions");
+    int n = 4;
+    long ar[] = {2, 5, 2, 3};
+
+    log_test("Mean", mean(ar, n) == 3);
+    log_test("Min", min(ar, n) == 2);
+    log_test("Max", max(ar, n) == 5);
+    log_test("Standard deviation", standard_deviation(ar, n) <= 1.22475f && standard_deviation(ar, n) >= 1.22454f);
+}
+
 int main(int argc, char** argv) {
     mute_logs();
     test_ds();
+    test_helper();
     printf("\n%d/%d tests passed\n", passed_tests, total_tests);
     return 0;
 }

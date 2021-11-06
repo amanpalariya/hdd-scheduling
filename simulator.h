@@ -3,4 +3,6 @@
 
 #include "ds.h"
 
+void run(int number_of_requests, struct disk* d, enum scheduling_algo algo);
+
 #endif

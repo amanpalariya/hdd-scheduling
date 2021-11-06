@@ -10,15 +10,14 @@
 #include "helper.h"
 #include "logger.h"
 
-struct request* generate_random_request() {
-    // TODO: Change numbers
-    return get_new_request(1, 2, 3, 4);
+struct request* generate_random_request(struct disk* d) {
+    return get_new_request(randint(0, d->number_of_surfaces - 1), randint(0, d->number_of_cylinders - 1), randint(0, d->number_of_sectors_per_track - 1), randint(1, d->number_of_sectors_per_track));
 }
 
 void swap_requests(struct request** req_1, struct request** req_2) {
     struct request* req = *req_1;
-    *req_1 = req_2;
-    *req_2 = req_1;
+    *req_1 = *req_2;
+    *req_2 = *req_1;
 }
 
 void random_sort(int number_of_requests, struct request** reqs) {
@@ -113,32 +112,39 @@ void sort_according_to_algo(int number_of_requests, struct request** reqs, enum 
             break;
         case SSTF:
             sstf_sort(number_of_requests, reqs, 0);
+            break;
         case SCAN:
             scan_sort(number_of_requests, reqs, 0, true);
+            break;
         case C_SCAN:
             c_scan_sort(number_of_requests, reqs, 0);
+            break;
         default:
             break;
     }
 }
 
-long service_requests_sequentially(int number_of_requests, struct request** reqs, struct disk* d) {
+void service_requests_sequentially(int number_of_requests, struct request** reqs, struct disk* d) {
     long time = 0;
+    long response_times[number_of_requests];
     for (int i = 0; i < number_of_requests; i++) {
+        response_times[i] = time;
+        log_info("Time elapsed: %ld ms", time);
         time += get_time_taken_to_obey_request_in_millis(d, reqs[i]);
         log_info("Servicing request (platter=%d, cylinder=%d, sector=%d, number_of_sectors_to_read=%d)", reqs[i]->platter, reqs[i]->cylinder, reqs[i]->sector, reqs[i]->number_of_sectors_to_read);
         log_info("Moving RW head from [cylinder, sector] (%d, %d) -> (%d, %d)", d->rw_head_track, d->rw_head_sector, reqs[i]->cylinder, reqs[i]->sector);
         move_to_position_of_request(d, reqs[i]);
     }
-    return time;
+    log_info("Time elapsed: %ld ms", time);
+    log_stat("Response Time: (avg) %.2f ms, (min) %.2f ms, (max) %.2f ms, (sd) %.2f ms", mean(response_times, number_of_requests), min(response_times, number_of_requests), max(response_times, number_of_requests), standard_deviation(response_times, number_of_requests));
+    log_stat("Throughput: %.2f requests per second", (1.0f * number_of_requests) * 1000 / time);
 }
 
-long run(int number_of_requests, struct disk* d, enum scheduling_algo algo) {
+void run(int number_of_requests, struct disk* d, enum scheduling_algo algo) {
     struct request* reqs[number_of_requests];
     for (int i = 0; i < number_of_requests; i++) {
-        reqs[i] = generate_random_request();
+        reqs[i] = generate_random_request(d);
     }
     sort_according_to_algo(number_of_requests, reqs, algo);
-    long time_taken_in_millis = service_requests_sequentially(number_of_requests, reqs, d);
-    return time_taken_in_millis;
+    service_requests_sequentially(number_of_requests, reqs, d);
 }
