@@ -29,23 +29,23 @@ struct disk* get_new_disk(
     d->number_of_surfaces = number_of_surfaces;
     d->number_of_cylinders = number_of_cylinders;
     d->number_of_sectors_per_track = number_of_sectors_per_track;
-    d->rw_head_track = get_new_int_array(number_of_cylinders);
-    d->rw_head_sector = get_new_int_array(number_of_sectors_per_track);
+    d->rw_head_track = 0;
+    d->rw_head_sector = 0;
     return d;
 }
 
 long get_time_taken_to_obey_request_in_millis(struct disk* d, struct request* req) {
     // TODO: Fix seek time
     // Everything is calculated in milliseconds
-    long seek_time = abs(req->cylinder - d->rw_head_track[req->platter]);
-    long rotational_delay = (req->sector - d->rw_head_sector[req->platter] + d->number_of_sectors_per_track) % d->number_of_sectors_per_track;
+    long seek_time = abs(req->cylinder - d->rw_head_track);
+    long rotational_delay = (req->sector - d->rw_head_sector + d->number_of_sectors_per_track) % d->number_of_sectors_per_track;
     long transfer_time = (req->number_of_sectors_to_read - 1) * d->rotational_speed_in_RPM * 60 * 1000 / d->number_of_sectors_per_track;
     return seek_time + rotational_delay + transfer_time;
 }
 
 void move_to_position_of_request(struct disk* d, struct request* req) {
-    d->rw_head_track[req->platter] = req->cylinder;
-    d->rw_head_sector[req->platter] = (req->sector + req->number_of_sectors_to_read) % d->number_of_sectors_per_track;
+    d->rw_head_track = req->cylinder;
+    d->rw_head_sector = (req->sector + req->number_of_sectors_to_read) % d->number_of_sectors_per_track;
 }
 
 struct request* get_new_request(
@@ -173,7 +173,5 @@ void free_request(struct request* req) {
 }
 
 void free_disk(struct disk* d) {
-    free(d->rw_head_track);
-    free(d->rw_head_sector);
     free(d);
 }

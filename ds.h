@@ -4,6 +4,14 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+enum scheduling_algo {
+    RANDOM = 0,
+    FIFO = 1,
+    SSTF = 2,
+    SCAN = 3,
+    C_SCAN = 4
+};
+
 struct disk {
     int rotational_speed_in_RPM;
     int avg_seek_time;
@@ -11,8 +19,8 @@ struct disk {
     int number_of_surfaces;
     int number_of_cylinders;
     int number_of_sectors_per_track;
-    int* rw_head_track;
-    int* rw_head_sector;
+    int rw_head_track;
+    int rw_head_sector;
 };
 
 struct request {
@@ -44,6 +52,10 @@ struct disk* get_new_disk(
     int number_of_surfaces,
     int number_of_cylinders,
     int number_of_sectors_per_track);
+
+long get_time_taken_to_obey_request_in_millis(struct disk* d, struct request* req);
+
+void move_to_position_of_request(struct disk* d, struct request* req);
 
 struct request* get_new_request(
     int platter,
