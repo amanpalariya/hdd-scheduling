@@ -113,19 +113,16 @@ void sort_according_to_algo(int number_of_requests, struct request** reqs, enum 
             break;
         case SSTF:
             sstf_sort(number_of_requests, reqs, 0);
-            break;
         case SCAN:
             scan_sort(number_of_requests, reqs, 0, true);
-            break;
         case C_SCAN:
             c_scan_sort(number_of_requests, reqs, 0);
-            break;
         default:
             break;
     }
 }
 
-long service_requests(int number_of_requests, struct request** reqs, int* arrival_time, struct disk* d, enum scheduling_algo algo) {
+long service_requests_sequentially(int number_of_requests, struct request** reqs, struct disk* d) {
     long time = 0;
     for (int i = 0; i < number_of_requests; i++) {
         time += get_time_taken_to_obey_request_in_millis(d, reqs[i]);
@@ -138,12 +135,10 @@ long service_requests(int number_of_requests, struct request** reqs, int* arriva
 
 long run(int number_of_requests, struct disk* d, enum scheduling_algo algo) {
     struct request* reqs[number_of_requests];
-    int arrival_time[number_of_requests];
     for (int i = 0; i < number_of_requests; i++) {
         reqs[i] = generate_random_request();
-        arrival_time[i] = i;  // TODO: Fix this
     }
-    // sort_according_to_algo(number_of_requests, reqs, algo);
-    long time_taken_in_millis = service_requests(number_of_requests, reqs, arrival_time, d, algo);
+    sort_according_to_algo(number_of_requests, reqs, algo);
+    long time_taken_in_millis = service_requests_sequentially(number_of_requests, reqs, d);
     return time_taken_in_millis;
 }
