@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     int number_of_surfaces = 4;
     int number_of_cylinders = 25;
     int sectors_per_track = 20;
-    int number_of_requests = 100;
+    int number_of_requests = 1000;
     enum scheduling_algo algo;
 
     scanf("%d", &r);
@@ -58,6 +58,7 @@ int main(int argc, char** argv) {
     printf("\n\n");
 
     srand(time(NULL));
+    set_log_level(LOG_LEVEL_STAT);
 
     run(number_of_requests, get_new_disk(r, t_s, N, number_of_surfaces, number_of_cylinders, sectors_per_track), algo);
     return 0;

@@ -1,7 +1,3 @@
-Submitter name: Aman Palariya
-Roll No: 2019CSB1068
-Course: CS303
-
 # What does the program do?
 
 It simulates the working of the HDD with given configuration and calculates stats based on random requests.
