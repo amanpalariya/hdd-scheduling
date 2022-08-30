@@ -36,7 +36,7 @@ After doing the following steps
 2. Start the simulation by executing `printf "7500 512 4 2" | ./build/main.out`.
 
 A possible output can be the following
----
+```
 Starting simulation with the following configuration
 Rotational Speed: 7500 RPM  
 Sector size     : 512 bytes
@@ -346,4 +346,4 @@ INFO  18:55:34: Moving RW head from [cylinder, sector] (0, 13) -> (11, 4)
 INFO  18:55:34: Time elapsed: 730 ms
 STAT  18:55:34: Response Time: (avg) 350.78 ms, (min) 0.00 ms, (max) 717.00 ms, (sd) 209.27 ms
 STAT  18:55:34: Throughput: 136.99 requests per second
----
+```
